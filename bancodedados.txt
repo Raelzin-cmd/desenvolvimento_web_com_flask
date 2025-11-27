@@ -1,0 +1,1 @@
+[{"id": 1, "marca": "Vokswagem", "modelo": "Fusca", "ano": 1990, "cor": "Branco"}, {"id": 2, "marca": "Tesla", "modelo": "Model X", "ano": 2024, "cor": "Branco"}]

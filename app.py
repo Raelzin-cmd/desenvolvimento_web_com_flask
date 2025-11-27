@@ -3,28 +3,26 @@
 # Altera a interepreção para o .venv
 
 from flask import Flask, jsonify, make_response, request
+from json import loads, dumps
 
 # Criando a variavel que receberá o servidor
 servidor = Flask(__name__)
 
-# Dicionário = Objeto de carros
-carros = [
-    {
-        'id': 1,
-        'marca': 'Ford',
-        'modelo': 'Ranger',
-        'ano': 2020,
-        'cor': 'Preto'
-    },
-    {
-        'id': 2,
-        'marca': 'Chevrolet',
-        'modelo': 'Camaro',
-        'ano': 2023,
-        'cor': 'Prata'
-    }
-]
+# Permite a leitura de outro arquivo
+with open('bancodedados.txt', 'r') as arquivo:
+    carros = loads(arquivo.read())  # Pega todo o texto do banco de dados
 
+
+def persistir_carro(carro): # Persistindo o cadastro de um novo carro
+    carros.append(carro)    # Cadastra no banco de dados
+    # Permite editar outro arquivo
+    with open('bancodedados.txt', 'w') as arquivo:  # Permite escrita no banco de dados
+        arquivo.write(dumps(carros))    # Transforma a string em formato JSON
+
+def persistir_lista_carros(carros): # Persistindo a listagem de todos os carros
+    # Permite editar outro arquivo
+    with open('bancodedados.txt', 'w') as arquivo:  # Permite escrita no banco de dados
+        arquivo.write(dumps(carros))    # Transforma a string em formato JSON
 
 # READ                   # http://localhost:5001/carros
 @servidor.route('/carros', methods=['GET'])
@@ -32,7 +30,7 @@ def listar_carros(): # make_response para configurar o status (200 é o padrão)
     return make_response(jsonify(carros))  # Assegurar que será retornado uma lista json
 
 
-# Detalhar               Convertendo (string) para (int)    # http://localhost:5001/carros/1
+# Detalhar               Convertendo (string) para (int)    # http://localhost:5001/carros/id
 @servidor.route('/carros/<int:id_carro>', methods=['GET'])
 def detalhar_carro(id_carro):   # id_carro recebe o ID mencionado na URL
     # Percorre toda a lista de carros
@@ -50,14 +48,15 @@ def detalhar_carro(id_carro):   # id_carro recebe o ID mencionado na URL
 '''
 Use o parâmetro body json do Postman para cadastrar um novo carro
 '''
+                # http://localhost:5001/carros
 @servidor.route('/carros', methods=['POST'])
 def cadastrar_carro():
     body = request.get_json()   # Lê o json enviado na requisição
-    carros.append(body)    # Adiciona o json à lista
+    persistir_carro(body)    # Adiciona o json à lista
     return make_response(body, 201) # Retorno de criação bem sucedida
 
 
-# UPDATE
+# UPDATE                    http://localhost:5001/carros/id
 @servidor.route('/carros/<int:id_carro>', methods=['PUT'])
 def editar_carro(id_carro):
     body = dict(request.get_json()) # Body retornando em forma de dicionário
@@ -67,17 +66,19 @@ def editar_carro(id_carro):
             item['modelo'] = body['modelo']
             item['ano'] = body['ano']
             item['cor'] = body['cor']
+            persistir_lista_carros(carros) # Pegar a lista atualizada
             return make_response({}, 204)
     # Status de erro se o ID não for encontrado
     return make_response(jsonify({'message': 'O carro não existe'}), 404)
 
 
-# DELETE
+# DELETE                    http://localhost:5001/carros/id
 @servidor.route('/carros/<int:id_carro>', methods=['DELETE'])
 def excluir_carro(id_carro):
     for item in carros:
         if item['id'] == id_carro:  # Se o ID for encontrado, vai alterar os items abaixo
             carros.remove(item)
+            persistir_lista_carros(carros)  # Pegar a lista atualizada
             return make_response({}, 204)
     # Status de erro se o ID não for encontrado
     return make_response(jsonify({'message': 'O carro não existe'}), 404)
