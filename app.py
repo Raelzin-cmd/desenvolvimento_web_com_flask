@@ -26,15 +26,15 @@ carros = [
 ]
 
 
-# Listar                   # http://localhost:5001/carros
+# READ                   # http://localhost:5001/carros
 @servidor.route('/carros', methods=['GET'])
-def lista_carros(): # make_response para configurar o status (200 é o padrão)
+def listar_carros(): # make_response para configurar o status (200 é o padrão)
     return make_response(jsonify(carros))  # Assegurar que será retornado uma lista json
 
 
 # Detalhar               Convertendo (string) para (int)    # http://localhost:5001/carros/1
 @servidor.route('/carros/<int:id_carro>', methods=['GET'])
-def detalhe_carros(id_carro):   # id_carro recebe o ID mencionado na URL
+def detalhar_carro(id_carro):   # id_carro recebe o ID mencionado na URL
     # Percorre toda a lista de carros
     for item in carros:
         # Compara o ID da procura na URL com o ID dos carros no código
@@ -46,15 +46,31 @@ def detalhe_carros(id_carro):   # id_carro recebe o ID mencionado na URL
     return make_response(jsonify({'message': 'O carro não existe'}), 404)
 
 
-# Cadastrar
+# CREATE
 '''
 Use o parâmetro body json do Postman para cadastrar um novo carro
 '''
 @servidor.route('/carros', methods=['POST'])
-def cadastro_carro():
+def cadastrar_carro():
     body = request.get_json()   # Lê o json enviado na requisição
     carros.append(body)    # Adiciona o json à lista
     return make_response(body, 201) # Retorno de criação bem sucedida
+
+
+# UPDATE
+@servidor.route('/carros/<int:id_carro>', methods=['PUT'])
+def editar_carro(id_carro):
+    body = dict(request.get_json()) # Body retornando em forma de dicionário
+    for item in carros:
+        if item['id'] == id_carro:
+            item['marca'] = body['marca']
+            item['modelo'] = body['modelo']
+            item['ano'] = body['ano']
+            item['cor'] = body['cor']
+            return make_response({}, 204)
+        
+    # Status de erro se o ID não for encontrado
+    return make_response(jsonify({'message': 'O carro não existe'}), 404)
 
 
 # Alterando porta de saída padrão, nome do IP e ativando modo debug
