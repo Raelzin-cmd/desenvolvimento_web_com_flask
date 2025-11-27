@@ -62,13 +62,23 @@ def cadastrar_carro():
 def editar_carro(id_carro):
     body = dict(request.get_json()) # Body retornando em forma de dicionário
     for item in carros:
-        if item['id'] == id_carro:
+        if item['id'] == id_carro:  # Se o ID for encontrado, vai alterar os items abaixo
             item['marca'] = body['marca']
             item['modelo'] = body['modelo']
             item['ano'] = body['ano']
             item['cor'] = body['cor']
             return make_response({}, 204)
-        
+    # Status de erro se o ID não for encontrado
+    return make_response(jsonify({'message': 'O carro não existe'}), 404)
+
+
+# DELETE
+@servidor.route('/carros/<int:id_carro>', methods=['DELETE'])
+def excluir_carro(id_carro):
+    for item in carros:
+        if item['id'] == id_carro:  # Se o ID for encontrado, vai alterar os items abaixo
+            carros.remove(item)
+            return make_response({}, 204)
     # Status de erro se o ID não for encontrado
     return make_response(jsonify({'message': 'O carro não existe'}), 404)
 
