@@ -2,7 +2,7 @@
 # python -m pip install Flask
 # Altera a interepreção para o .venv
 
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, request
 
 # Criando a variavel que receberá o servidor
 servidor = Flask(__name__)
@@ -46,7 +46,15 @@ def detalhe_carros(id_carro):   # id_carro recebe o ID mencionado na URL
     return make_response(jsonify({'message': 'O carro não existe'}), 404)
 
 
-
+# Cadastrar
+'''
+Use o parâmetro body json do Postman para cadastrar um novo carro
+'''
+@servidor.route('/carros', methods=['POST'])
+def cadastro_carro():
+    body = request.get_json()   # Lê o json enviado na requisição
+    carros.append(body)    # Adiciona o json à lista
+    return make_response(body, 201) # Retorno de criação bem sucedida
 
 
 # Alterando porta de saída padrão, nome do IP e ativando modo debug
